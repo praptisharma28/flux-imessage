@@ -1,0 +1,14 @@
+{
+  "name": "flux",
+  "version": "1.0.0",
+  "description": "Your second brain in iMessage. Text it anything worth remembering.",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun --watch src/index.ts"
+  },
+  "dependencies": {
+    "@photon-ai/imessage-kit": "^3.0.0-rc.1",
+    "@anthropic-ai/sdk": "^0.39.0"
+  }
+}
