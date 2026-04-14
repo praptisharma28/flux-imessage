@@ -20,8 +20,8 @@ export interface MessageRow {
 export class MemoryStore {
   private db: Database;
 
-  constructor(path = "./flux.db") {
-    this.db = new Database(path);
+  constructor(path?: string) {
+    this.db = new Database(path ?? "./flux.db");
     this.db.run("PRAGMA journal_mode = WAL");
     this.migrate();
   }
@@ -63,12 +63,21 @@ export class MemoryStore {
     content: string,
     category: string,
     tags: string[]
-  ) {
+  ): boolean {
+    // Reject exact duplicates for the same sender
+    const existing = this.db
+      .query<{ id: number }, [string, string]>(
+        "SELECT id FROM memories WHERE sender = ?1 AND content = ?2 LIMIT 1"
+      )
+      .get(sender, content);
+    if (existing) return false;
+
     this.db
       .query(
         "INSERT INTO memories (sender, content, category, tags) VALUES (?1, ?2, ?3, ?4)"
       )
       .run(sender, content, category, JSON.stringify(tags));
+    return true;
   }
 
   getMemories(sender: string, limit = 50): MemoryRow[] {

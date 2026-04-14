@@ -97,6 +97,16 @@ bun start
 
 You'll see `Flux is awake. Listening for messages…` — now text yourself from another device. Flux will reply through your Messages app.
 
+### Test it without iMessage first (recommended)
+
+Before wiring up iMessage and Full Disk Access, you can verify your API key and agent logic locally with the built-in REPL:
+
+```bash
+bun run repl
+```
+
+You'll get a terminal chat with Flux using a separate `flux-repl.db` so your real memories stay clean. Same agent, same memory store, zero iMessage permissions needed.
+
 ---
 
 ## Project structure

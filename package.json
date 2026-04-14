@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "bun run src/index.ts",
-    "dev": "bun --watch src/index.ts"
+    "dev": "bun --watch src/index.ts",
+    "repl": "bun run src/repl.ts"
   },
   "dependencies": {
     "@photon-ai/imessage-kit": "^2.1.2",
