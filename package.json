@@ -8,7 +8,11 @@
     "dev": "bun --watch src/index.ts"
   },
   "dependencies": {
-    "@photon-ai/imessage-kit": "^3.0.0-rc.1",
-    "@anthropic-ai/sdk": "^0.39.0"
+    "@photon-ai/imessage-kit": "^2.1.2",
+    "@anthropic-ai/sdk": "^0.88.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.3.0"
   }
 }

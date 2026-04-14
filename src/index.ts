@@ -2,7 +2,14 @@ import { IMessageSDK } from "@photon-ai/imessage-kit";
 import { FluxAgent } from "./agent";
 import { MemoryStore } from "./store";
 
-const store = new MemoryStore();
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.error(
+    "Missing ANTHROPIC_API_KEY. Copy .env.example to .env and paste your key from https://console.anthropic.com."
+  );
+  process.exit(1);
+}
+
+const store = new MemoryStore(process.env.FLUX_DB_PATH);
 const agent = new FluxAgent(store);
 const sdk = new IMessageSDK();
 
@@ -21,42 +28,44 @@ if (allowedSenders.length > 0) {
 await sdk.startWatching({
   onDirectMessage: async (msg) => {
     if (msg.isFromMe) return;
-    if (!msg.text || !msg.text.trim()) return;
+    if (msg.isReaction) return;
+    const text = msg.text?.trim();
+    if (!text) return;
 
-    if (
-      allowedSenders.length > 0 &&
-      !allowedSenders.includes(msg.participant)
-    ) {
+    const sender = msg.sender;
+    if (allowedSenders.length > 0 && !allowedSenders.includes(sender)) {
       return;
     }
 
-    // Dedup: ignore if we're already processing a message from this sender
-    if (inFlight.has(msg.participant)) {
-      console.log(`Skipping concurrent message from ${msg.participant}`);
+    if (inFlight.has(sender)) {
+      console.log(`Skipping concurrent message from ${sender}`);
       return;
     }
 
-    inFlight.add(msg.participant);
-    console.log(`← ${msg.participant}: ${msg.text}`);
+    inFlight.add(sender);
+    console.log(`← ${sender}: ${text}`);
 
     try {
-      const reply = await agent.processMessage(msg.participant, msg.text);
-      await sdk.send(msg.participant, reply);
-      console.log(`→ ${msg.participant}: ${reply}`);
+      const reply = await agent.processMessage(sender, text);
+      await sdk.send(sender, reply);
+      console.log(`→ ${sender}: ${reply}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error(`Error handling message from ${msg.participant}:`, message);
+      console.error(`Error handling message from ${sender}:`, message);
       try {
         await sdk.send(
-          msg.participant,
+          sender,
           "Sorry, my brain hiccuped. Mind sending that again?"
         );
       } catch {
         // swallow — nothing more we can do
       }
     } finally {
-      inFlight.delete(msg.participant);
+      inFlight.delete(sender);
     }
+  },
+  onError: (error) => {
+    console.error("Watcher error:", error.message);
   },
 });
 

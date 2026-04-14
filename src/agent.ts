@@ -53,7 +53,7 @@ export class FluxAgent {
     }
     this.client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     this.store = store;
-    this.model = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514";
+    this.model = process.env.CLAUDE_MODEL || "claude-sonnet-4-5";
   }
 
   async processMessage(sender: string, text: string): Promise<string> {
